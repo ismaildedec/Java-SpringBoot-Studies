@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args) throws SQLException {
 		
-		
+		selectDemo();
 
 	}
 	
@@ -57,12 +57,12 @@ public class Main {
 			 
 			connection = helper.getConnection();
 			//Soru işaretleri kullanıcadan alınacağını belirtir.
-			String sql = "into city (Name,CountryCode,District,Population) values (?,?,?,?)";
+			String sql = "insert into city (Name,CountryCode,District,Population) values (?,?,?,?)";
 			statement = connection.prepareStatement(sql);
 			
 			//1 kaçıncı soru işaretiyse onu belirtir.
 			statement.setString(1,"Duzce" );
-			statement.setString(2,"TR" );
+			statement.setString(2,"TUR" );
 			statement.setString(3,"Duzce" );
 			statement.setInt(4,5000 );
 			statement.executeUpdate();
@@ -84,8 +84,58 @@ public class Main {
 		 * ); statement.executeUpdate(); System.out.println("Kayıt eklendi");
 		 * 
 		 * } catch (SQLException e) { helper.showErrorMessage(e); } finally {
-		 * statement.close(); connection.close(); }
-		 */
+		 * statement.close(); connection.close(); }
+		 */
+	}
+	
+	public static void updateDemo() throws SQLException{
+		
+		Connection connection = null;
+		DbHelper helper = new DbHelper();
+		java.sql.PreparedStatement statement = null;
+		ResultSet result = null;
+		
+		try {
+			 
+			connection = helper.getConnection();
+			
+			String sql = "update city set population = 8000 where id = 4085";
+			statement = connection.prepareStatement(sql);
+			statement.executeUpdate();
+			System.out.println("Kayıt Güncellendi");
+			
+		} catch (SQLException e) {
+			helper.showErrorMessage(e);
+		} finally {
+			statement.close();
+			connection.close();
+		}
+	}
+	
+	public static void deleteDemo() throws SQLException{
+		
+		Connection connection = null;
+		DbHelper helper = new DbHelper();
+		java.sql.PreparedStatement statement = null;
+		ResultSet result = null;
+		
+		try {
+			 
+			connection = helper.getConnection();
+			
+			String sql = "delete from city  where id = ?";
+			statement = connection.prepareStatement(sql);
+			
+			statement.setInt(1, 4085);
+			statement.executeUpdate();
+			System.out.println("Kayıt Silindi");
+			
+		} catch (SQLException e) {
+			helper.showErrorMessage(e);
+		} finally {
+			statement.close();
+			connection.close();
+		}
 	}
 
 }
