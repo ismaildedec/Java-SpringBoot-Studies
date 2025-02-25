@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import com.ihsandedec.model.Employee;
 
 @Repository
@@ -68,5 +67,23 @@ public class EmployeeRepository {
 		
 		employeeList.add(newEmployee);
 		return newEmployee;
+	}
+	
+	public boolean deleteEmployee(String id) {
+		
+		Employee deleteEmployee = null;
+		
+		for (Employee employee : employeeList) {
+			if (id.equals(employee.getId())) {
+				deleteEmployee = employee;
+				break;
+			}
+		}
+		if (deleteEmployee == null) {
+			return false;
+		}else {
+			employeeList.remove(deleteEmployee);
+			return true;
+		}
 	}
 }
