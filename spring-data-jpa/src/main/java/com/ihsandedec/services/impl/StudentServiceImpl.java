@@ -1,11 +1,16 @@
 package com.ihsandedec.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.catalina.mbeans.MBeanUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ihsandedec.dto.DtoStudent;
+import com.ihsandedec.dto.DtoStudentIU;
 import com.ihsandedec.entites.Student;
 import com.ihsandedec.repository.IStudentRepository;
 import com.ihsandedec.services.IStudentService;
@@ -17,47 +22,82 @@ public class StudentServiceImpl implements IStudentService{
 	private IStudentRepository studentRepository;
 	
 	@Override
-	public Student saveStudent(Student student) {
+	public DtoStudent saveStudent(DtoStudentIU dtoStudentIU) {
+		DtoStudent responseDtoStudent = new DtoStudent();
+		Student student = new Student();
 		
-		return studentRepository.save(student);
+		BeanUtils.copyProperties(dtoStudentIU, student);
+		Student dbStudent =  studentRepository.save(student);
+		
+		BeanUtils.copyProperties(dbStudent, responseDtoStudent);
+		return responseDtoStudent;
 	}
 
 	@Override
-	public List<Student> getAllStudents() {
+	public List<DtoStudent> getAllStudents() {
+		List<DtoStudent> dtoList = new ArrayList<>();
 		List<Student> studentsList =  studentRepository.findAll();
-		return studentsList;
+		
+		for (Student student : studentsList) {
+			DtoStudent dto = new DtoStudent();
+			BeanUtils.copyProperties(student, dto);
+			dtoList.add(dto);
+		}
+		
+		return dtoList;
 	}
 
 	@Override
-	public Student getStudentById(Integer id) {
+	public DtoStudent getStudentById(Integer id) {
+		DtoStudent dtoStudent = new DtoStudent();
+		
 		Optional<Student> optional =  studentRepository.findById(id);
+		
 		if (optional.isPresent()) {
-			return optional.get();
+			Student dbStudent = optional.get();
+			BeanUtils.copyProperties(dbStudent, dtoStudent);
+			return dtoStudent;
 		}
 		return null;
 	}
 
 	@Override
 	public void deleteStudent(Integer id) {
-		
-		Student dbStudent = getStudentById(id);
-		if (dbStudent != null) {
-			studentRepository.delete(dbStudent);
+		//Direk veritabanından çekilmiş studenti silebilriiz.o yüzden dto kullanmadık. 
+		Optional<Student> optional =  studentRepository.findById(id);
+		if (optional.isPresent()) {
+			studentRepository.delete(optional.get());
 		}
-		
 	}
 
 	@Override
-	public Student updateStudent(Integer id, Student newStudent) {
-		Student dbStudent = getStudentById(id);
-		if (dbStudent != null) {
-			dbStudent.setFirstName(newStudent.getFirstName());
-			dbStudent.setLastName(newStudent.getLastName());
-			dbStudent.setBirthOfDate(newStudent.getBirthOfDate());
+	public DtoStudent updateStudent(Integer id, DtoStudentIU dtoStudentIU) {
+		DtoStudent dtoStudent = new DtoStudent();
+		
+		Optional<Student> optional =  studentRepository.findById(id);
+		if (optional.isPresent()) {
+			Student dbStudent = optional.get();
+			dbStudent.setFirstName(dtoStudentIU.getFirstName());
+			dbStudent.setLastName(dtoStudentIU.getLastName());
+			dbStudent.setBirthOfDate(dtoStudentIU.getBirthOfDate());
 			
-			return studentRepository.save(dbStudent);
+			Student updatedStudent = studentRepository.save(dbStudent);
+			
+			BeanUtils.copyProperties(updatedStudent, dtoStudent);
+			return dtoStudent;
 		}
 		return null;
+		
+		
+		/*
+		 *DTO ya çevirmeden önce yaptığım işlem
+		 * Student dbStudent = getStudentById(id); if (dbStudent != null) {
+		 * dbStudent.setFirstName(newStudent.getFirstName());
+		 * dbStudent.setLastName(newStudent.getLastName());
+		 * dbStudent.setBirthOfDate(newStudent.getBirthOfDate());
+		 * 
+		 * return studentRepository.save(dbStudent); } return null;
+		 */
 
 	}
 
